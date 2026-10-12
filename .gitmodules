@@ -1,0 +1,3 @@
+[submodule "mgz-fast"]
+	path = mgz-fast
+	url = https://github.com/AoEInsights/mgz-fast.git

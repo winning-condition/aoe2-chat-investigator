@@ -1,0 +1,14 @@
+# Local data: never commit player names, recordings or chat logs.
+watchlist.json
+replays/
+output/
+*.zip
+*.aoe2record
+*.mgz
+*.mgx
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
