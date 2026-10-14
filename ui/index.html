@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AOE2 Chat Investigator</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header class="banner">
+      <div>
+        <h1>AOE2 Chat Investigator</h1>
+        <p>Watch profiles · Extract chat · Keep the record</p>
+      </div>
+      <div class="actions">
+        <button id="check-all">Check all players</button
+        ><button id="quit">Quit</button>
+      </div>
+    </header>
+    <main class="shell">
+      <aside class="panel watchlist" aria-label="Watched players">
+        <h2>Watchlist</h2>
+        <button id="add-player" class="wide">+ Add player</button>
+        <div id="players" class="player-list"></div>
+        <button id="edit-player" class="secondary wide">Edit player</button>
+        <div class="sidebar-bottom">
+          <button id="import" class="wide">Import replays</button
+          ><input
+            id="files"
+            type="file"
+            accept=".zip,.aoe2record"
+            multiple
+            hidden
+          />
+        </div>
+      </aside>
+      <section class="panel workspace" aria-label="Player investigation">
+        <div class="workspace-heading">
+          <div>
+            <h2 id="player-name">Your local chat archive</h2>
+            <p id="player-profile">Add a player to get started.</p>
+          </div>
+          <div class="actions">
+            <button id="fetch">Fetch &amp; extract</button
+            ><button id="extract">Extract local</button>
+          </div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Reports">
+          <button
+            id="transcripts-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="transcripts"
+          >
+            Transcripts
+          </button>
+          <button
+            id="summary-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="summary"
+          >
+            Daily summary
+          </button>
+        </div>
+        <section
+          id="transcripts"
+          role="tabpanel"
+          aria-labelledby="transcripts-tab"
+        >
+          <div class="filters">
+            <div class="searchbox">
+              <input
+                id="search"
+                type="search"
+                aria-label="Search chat, speaker or match"
+                placeholder="Search chat, speaker or match…"
+              />
+            </div>
+            <label class="check"
+              ><input type="checkbox" id="target-only" /> Watched player
+              only</label
+            >
+          </div>
+          <div class="report-grid">
+            <section class="panel matches">
+              <h3>Matches <span id="match-count"></span></h3>
+              <div id="matches"></div>
+            </section>
+            <section
+              class="panel transcript"
+              aria-label="Selected match transcript"
+            >
+              <div id="transcript"></div>
+            </section>
+          </div>
+        </section>
+        <section
+          id="summary"
+          role="tabpanel"
+          aria-labelledby="summary-tab"
+          hidden
+        >
+          <h3>Latest daily check</h3>
+          <pre id="summary-text"></pre>
+        </section>
+        <details class="options">
+          <summary>Extraction options &amp; local storage</summary>
+          <div class="option-fields">
+            <label
+              >History pages
+              <input
+                id="pages"
+                type="number"
+                min="1"
+                max="50"
+                value="3" /></label
+            ><label class="check"
+              ><input id="offline" type="checkbox" /> Offline extraction (timing
+              attribution)</label
+            >
+          </div>
+          <p id="data-dir"></p>
+          <p>
+            Import .zip or .aoe2record files, then choose Extract local. Text
+            and CSV export the complete player report.
+          </p>
+        </details>
+      </section>
+    </main>
+    <footer>
+      <div id="status" role="status" aria-live="polite">
+        Ready. All reports stay on this machine.
+      </div>
+      <button id="cancel" class="secondary" hidden>Cancel task</button>
+    </footer>
+    <div id="notice" class="notice" role="alert" hidden></div>
+    <details id="task-log">
+      <summary>Task log</summary>
+      <pre id="log"></pre>
+    </details>
+    <dialog id="player-dialog" aria-labelledby="dialog-title">
+      <form id="player-form">
+        <h2 id="dialog-title">Add player</h2>
+        <p>Use the exact in-game name found in the recordings.</p>
+        <label
+          >In-game name<input
+            id="name"
+            required
+            maxlength="100"
+            autocomplete="off"
+        /></label>
+        <label
+          >Profile ID<input
+            id="profile"
+            required
+            inputmode="numeric"
+            pattern="[0-9]+"
+            autocomplete="off"
+        /></label>
+        <p class="hint">
+          The number in the player's AoE2 Companion or AoE2 Insights profile
+          URL.
+        </p>
+        <label
+          >Since match (optional)<input
+            id="since"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            autocomplete="off"
+        /></label>
+        <p id="form-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button id="remove" type="button" class="secondary" hidden>
+            Remove from watchlist</button
+          ><button id="dismiss" type="button" class="secondary">Cancel</button
+          ><button type="submit">Save player</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

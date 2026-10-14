@@ -355,7 +355,10 @@ def main():
     shown = [g for g in games if has_chat(g)]
     target_lines = 0
 
-    with open(txt_path, "w", encoding="utf-8") as txt, open(csv_path, "w", encoding="utf-8-sig", newline="") as cf:
+    # Keep the last complete report readable while the GUI rebuilds it. A failed
+    # or cancelled worker must not replace it with a half-written transcript.
+    txt_temp, csv_temp = txt_path + ".tmp", csv_path + ".tmp"
+    with open(txt_temp, "w", encoding="utf-8") as txt, open(csv_temp, "w", encoding="utf-8-sig", newline="") as cf:
         w = csv.writer(cf)
         w.writerow(["date", "match_id", "file", "map", "opponents", "result", "section", "game_time",
                     "speaker", "is_target", "type", "message", "attribution"])
@@ -395,6 +398,8 @@ def main():
                                 note if section != "game" else "recorded live"])
             txt.write("\n")
 
+    os.replace(txt_temp, txt_path)
+    os.replace(csv_temp, csv_path)
     skipped = [g for g in games if not has_chat(g) and not g.get("missing")]
     print(f"Parsed {len(seen)} unique replays ({duplicates} duplicates skipped, {len(failed)} failed).")
     print(history_note)

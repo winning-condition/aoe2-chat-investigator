@@ -27,13 +27,15 @@ import re
 import shutil
 import subprocess
 import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from runtime import worker_command
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "output")
 
 
 def run(script, *args):
-    p = subprocess.run([sys.executable, "-I", "-X", "utf8", os.path.join(HERE, script), *args],
+    p = subprocess.run(worker_command(script, args, HERE),
                        capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=HERE)
     return p.returncode, p.stdout + p.stderr
 
@@ -76,7 +78,7 @@ def check(player):
     before = replay_ids(replays)
     known = set(open(prev_ids).read().split()) if os.path.exists(prev_ids) else {str(i) for i in before}
     fetch_rc, fetch_log = run("fetch_replays.py", str(player["profile_id"]), replays, "--pages", "3")
-    parse_rc, parse_log = run("chatlog.py", replays, "--player", name, "--out", OUT)
+    parse_rc, parse_log = run("chatlog.py", replays, "--player=" + name, "--out", OUT)
     now_ids = replay_ids(replays)
     new_ids = sorted(i for i in now_ids if str(i) not in known)
 
@@ -143,8 +145,9 @@ def main():
     text = "\n".join(head + [ln for _, _, out in results for ln in out]) + "\n"
     os.makedirs(os.path.join(OUT, "daily"), exist_ok=True)
     for path in (os.path.join(OUT, "daily", f"{stamp:%Y-%m-%d}.txt"), os.path.join(OUT, "latest_check.txt")):
-        with open(path, "w", encoding="utf-8") as f:
+        with open(path + ".tmp", "w", encoding="utf-8") as f:
             f.write(text)
+        os.replace(path + ".tmp", path)
     print(head[1])
 
 

@@ -2,6 +2,97 @@
 
 An application that monitors known bad actors in the AOE2 community, downloads their available (or latest) recorded games, and parses them for spicy content in chat. Assists in the generation of evidence of code of conduct violations for user reports to moderators.
 
+## Local GUI
+
+The graphical interface uses the AOE2 Counter App's parchment, brass frames,
+walnut controls, Cinzel headings and Alegreya text. It runs entirely on your
+machine in your default browser. Fonts and textures are bundled; reading existing
+reports and extracting imported replays in offline mode need no internet.
+
+**Windows, no Python installation:** open `dist/AOE2-Chat-Investigator.exe`.
+It opens the GUI automatically. Use **Quit** to stop the local server. Closing
+the browser tab leaves it running so you can reopen the printed local URL.
+The portable executable starts with its own watchlist and stores data under
+`%LOCALAPPDATA%/AOE2 Chat Investigator`. To use this checkout's existing data,
+run the source launcher below, or launch the executable with
+`--data-dir "D:\path\to\AOE2 Chat Logs"`.
+
+**From source (all three platforms):** Python 3.10+ and a browser are the only
+runtime requirements. No pip/npm packages, web accounts or database are needed.
+Use the self-contained source ZIP in `dist/`, or clone with `--recursive` so
+the replay parser is present.
+
+| Platform | Launch from the application folder |
+|---|---|
+| Windows | Double-click `Start Windows.bat`, or `python -I gui.py` |
+| macOS | Open `Start macOS.command`, or `python3 -I gui.py` |
+| Linux | `sh start-linux.sh`, or `python3 -I gui.py` |
+
+The source launcher uses the checkout's existing `watchlist.json`, `replays/`
+and `output/`. Portable macOS builds use `~/Library/Application Support/AOE2
+Chat Investigator`; Linux builds use `$XDG_DATA_HOME/AOE2 Chat Investigator`
+(normally `~/.local/share/AOE2 Chat Investigator`). All launchers accept
+`--data-dir` through `gui.py` or the executable; `--no-browser` prints the URL
+without opening a tab, and `--port` selects a fixed port if needed.
+
+1. **Add player** using the exact in-game name and numeric profile ID.
+2. **Fetch & extract** downloads recent games and builds the transcript.
+   Alternatively, **Import replays** accepts `.zip` and `.aoe2record` files;
+   **Extract local** parses them. Check **Offline extraction** under the options
+   if match-history lookup is unwanted. Offline post-game attribution remains
+   explicitly marked as unverified.
+3. Select a match, search chat/speakers/match IDs, or filter to the watched player.
+   Search narrows the match list while the transcript retains surrounding context.
+   **Text** and **CSV** export the complete player report, independent of filters.
+4. **Check all players** runs the existing daily check; **Daily summary** shows
+   its report. The GUI does not install a scheduled task; scheduling instructions
+   below still apply. Long tasks expose their logs and a **Cancel task** button.
+
+Editing a name carries its downloaded replay folder to the new spelling; extract
+again to rebuild the renamed report. Old reports and daily baselines remain on
+disk. Removing a player only removes the watchlist entry and keeps local files.
+Importing a file twice keeps one content-addressed copy.
+
+The server binds only to `127.0.0.1`, chooses an available port, and uses a fresh
+unguessable launch path. It rejects foreign request origins and serves only the
+bundled UI and selected reports. No reports are uploaded by the GUI.
+
+### Building portable applications
+
+`scripts/build_portable.py` builds a single executable with Python, the parser,
+and GUI assets included. PyInstaller is a build dependency only:
+
+```text
+python -m pip install pyinstaller==6.22.0
+python scripts/build_portable.py
+python tests/portable_smoke.py
+python scripts/source_bundle.py
+python scripts/portable_archive.py
+python tests/portable_smoke.py --archive
+```
+
+Build separately on each target OS; PyInstaller output is specific to the OS
+and architecture used to build it. See the [PyInstaller operating-mode documentation](https://pyinstaller.org/en/stable/operating-mode.html).
+The GitHub Actions workflow `.github/workflows/portable.yml` defines tests and
+portable builds for Windows, Linux, Apple Silicon macOS and Intel macOS. It
+runs on pull requests, version tags or manual dispatch. The local Windows build
+has been tested; macOS and Linux artifacts still require those native build jobs.
+
+Run backend checks with `python -m unittest discover -s tests -v`. The portable
+smoke test starts the actual executable in a temporary data folder, adds a player,
+runs its bundled offline extraction worker and quits the server.
+
+Release archives include launch instructions and licenses. Windows gets a ZIP
+with the `.exe`; Linux gets a tarball retaining executable permissions; macOS
+gets a tarball containing `AOE2 Chat Investigator.app`, which can be opened in
+Finder without a terminal or Python. The app bundle follows Apple's
+[bundle structure](https://developer.apple.com/go/?id=bundle-structure) and
+[executable lookup](https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleexecutable).
+The macOS artifact is not notarized; macOS may require approval on first launch.
+Native macOS CI additionally launches the extracted `.app` through Launch
+Services and verifies its bundled replay worker. These native jobs have not
+run yet; archive layout tests on Windows do not prove macOS or Linux execution.
+
 ---
 
 ## In plain terms
