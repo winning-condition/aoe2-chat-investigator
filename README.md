@@ -75,8 +75,10 @@ Build separately on each target OS; PyInstaller output is specific to the OS
 and architecture used to build it. See the [PyInstaller operating-mode documentation](https://pyinstaller.org/en/stable/operating-mode.html).
 The GitHub Actions workflow `.github/workflows/portable.yml` defines tests and
 portable builds for Windows, Linux, Apple Silicon macOS and Intel macOS. It
-runs on pull requests, version tags or manual dispatch. The local Windows build
-has been tested; macOS and Linux artifacts still require those native build jobs.
+runs on GUI branch pushes, pull requests, version tags or manual dispatch. Each
+job tests the source, builds the executable, then imports and parses a real replay
+through both the built executable and the extracted release archive. Download
+the portable artifacts from a successful run in the repository's Actions tab.
 
 Run backend checks with `python -m unittest discover -s tests -v`. The portable
 smoke test starts the actual executable in a temporary data folder, adds a player,
@@ -90,8 +92,8 @@ Finder without a terminal or Python. The app bundle follows Apple's
 [executable lookup](https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleexecutable).
 The macOS artifact is not notarized; macOS may require approval on first launch.
 Native macOS CI additionally launches the extracted `.app` through Launch
-Services and verifies its bundled replay worker. These native jobs have not
-run yet; archive layout tests on Windows do not prove macOS or Linux execution.
+Services and verifies its bundled replay worker. Check the native job results
+before distributing an artifact; archive layout checks alone do not prove execution.
 
 ---
 

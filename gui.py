@@ -188,6 +188,11 @@ class Application:
 
     def cancel(self):
         with self.lock:
+            # Quit, request cancellation and shutdown can arrive together. Once
+            # a worker was signalled, do not signal its process group again:
+            # macOS can reject that group while the killed child is being reaped.
+            if self.cancelled.is_set():
+                return
             self.cancelled.set()
             if self.process and self.process.poll() is None:
                 if sys.platform == "win32":

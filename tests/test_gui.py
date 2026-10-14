@@ -179,6 +179,21 @@ class GuiTests(unittest.TestCase):
         self.assertEqual(self.server.app.job['status'], 'done', self.server.app.job['log'])
         self.assertTrue((self.data / 'output/--out_chat.txt').exists())
 
+    def test_repeated_cancel_only_signals_the_worker_group_once(self):
+        process = mock.Mock()
+        process.pid = 12345
+        process.poll.return_value = None
+        self.server.app.process = process
+        try:
+            with mock.patch('gui.sys.platform', 'darwin'), mock.patch('os.killpg', create=True) as signal_group:
+                self.server.app.cancel()
+                self.server.app.cancel()
+                self.assertTrue(self.server.app.cancelled.is_set())
+                signal_group.assert_called_once()
+                process.terminate.assert_not_called()
+        finally:
+            self.server.app.process = None
+
     def test_transcript_stays_consistent_during_rebuild(self):
         self.add_player()
         report = self.data / 'output/exampleplayer_chat.csv'
