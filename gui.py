@@ -322,7 +322,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.app.cancel()
             elif route == "api/quit":
                 self.app.cancel()
+                # Complete the HTTP response before allowing the server process
+                # to exit; request threads are daemons and cannot keep it alive.
+                self.respond({"ok": True})
+                self.wfile.flush()
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
+                return
             else:
                 raise ValueError("Unknown action.")
             self.respond({"ok": True})

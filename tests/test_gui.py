@@ -194,6 +194,13 @@ class GuiTests(unittest.TestCase):
         finally:
             self.server.app.process = None
 
+    def test_quit_returns_a_complete_response_before_stopping(self):
+        status, _, body = self.request('api/quit', {})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), {'ok': True})
+        self.thread.join(timeout=5)
+        self.assertFalse(self.thread.is_alive())
+
     def test_transcript_stays_consistent_during_rebuild(self):
         self.add_player()
         report = self.data / 'output/exampleplayer_chat.csv'
